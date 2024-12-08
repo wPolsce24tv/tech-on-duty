@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harmonogram Zmian</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
+        table { margin: auto; border-collapse: collapse; width: 80%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #f4f4f4; }
+    </style>
+</head>
+<body>
+    <h1>Aktualnie pracująca osoba</h1>
+    <div id="current-shift"></div>
+    <script>
+        async function fetchGoogleSheet() {
+            const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTSfMogf73nS-HjB1Zj4SN3CGky6pRuiqFLkjdFoYced2C50Dsh-GFrSVM5rw7wSWrzLURobFxbdqok/gviz/tq?tqx=out:json'; // Zastąp linkiem do danych JSON z Google Sheets
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                const now = new Date();
+                const todayShift = data.sheets[0].data.filter(row => {
+                    const startTime = new Date(row.start); // Data rozpoczęcia zmiany
+                    const endTime = new Date(row.end); // Data zakończenia zmiany
+                    return now >= startTime && now <= endTime;
+                });
+                document.getElementById('current-shift').innerText =
+                    todayShift.length
+                        ? todayShift.map(person => person.name).join(', ')
+                        : 'Brak danych o aktualnej zmianie.';
+            } catch (error) {
+                console.error('Błąd podczas pobierania danych:', error);
+            }
+        }
+
+        fetchGoogleSheet();
+    </script>
+</body>
+</html>
